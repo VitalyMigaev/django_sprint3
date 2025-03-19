@@ -29,7 +29,7 @@ def category_posts(request, category_slug):
         Category,
         slug=category_slug,
         is_published=True
-        )
+    )
     posts = Post.objects.filter(
         category=category,
         is_published=True,
