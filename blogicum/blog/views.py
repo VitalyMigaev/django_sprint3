@@ -1,9 +1,9 @@
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
-from django.http import HttpResponseNotFound
 from .models import Post, Category
+from .constants import N_POSTS_LIMIT
 
-N_POSTS_LIMIT = 5
+from django.http import HttpResponseNotFound
+from django.utils import timezone
+from django.shortcuts import render, get_object_or_404
 
 
 def index(request):
@@ -11,12 +11,16 @@ def index(request):
         pub_date__lte=timezone.now(),
         is_published=True,
         category__is_published=True
-    ).order_by('-pub_date')[:N_POSTS_LIMIT]
+    ).select_related('category').order_by('-pub_date')[:N_POSTS_LIMIT]
     return render(request, 'blog/index.html', {'posts': posts})
 
 
-def post_detail(request, id):
-    post = get_object_or_404(Post, id=id, is_published=True)
+def post_detail(request, post_id):
+    post = get_object_or_404(
+        Post.objects.select_related('category'),
+        id=post_id,
+        is_published=True
+    )
     if post.pub_date > timezone.now():
         return HttpResponseNotFound('Этот пост еще не опубликован.')
     if post.category and not post.category.is_published:
@@ -34,7 +38,7 @@ def category_posts(request, category_slug):
         category=category,
         is_published=True,
         pub_date__lte=timezone.now()
-    ).order_by('-pub_date')
+    ).select_related('category').order_by('-pub_date')
 
     return render(
         request,
