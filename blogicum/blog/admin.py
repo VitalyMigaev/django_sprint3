@@ -2,6 +2,17 @@ from django.contrib import admin
 from .models import Post, Category, Location
 
 
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = (
         'title',
@@ -13,8 +24,3 @@ class PostAdmin(admin.ModelAdmin):
     )
     list_filter = ('is_published', 'pub_date', 'category')
     search_fields = ('title', 'text')
-
-
-admin.site.register(Category)
-admin.site.register(Post, PostAdmin)
-admin.site.register(Location)
