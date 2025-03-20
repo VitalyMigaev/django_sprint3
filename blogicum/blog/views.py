@@ -10,7 +10,7 @@ def get_published_posts(category=None, author=None, location=None):
         pub_date__lte=timezone.now(),
         is_published=True,
         category__is_published=True
-    ).select_related('category')
+    ).select_related('category', 'author', 'location')
 
     if category:
         queryset = queryset.filter(category=category)
