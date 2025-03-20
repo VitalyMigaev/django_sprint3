@@ -1,9 +1,8 @@
 import pytest
-from django.db.models import (
-    BooleanField, CharField, DateTimeField, ForeignKey, TextField)
-from django.db.utils import IntegrityError
-
 from blog.models import Post
+from django.db.models import (BooleanField, CharField, DateTimeField,
+                              ForeignKey, TextField)
+from django.db.utils import IntegrityError
 from tests.conftest import _TestModelAttrs
 
 pytestmark = [

@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from .constants import TITLE_MAX_LENGTH
+
 User = get_user_model()
 
 
@@ -37,7 +39,7 @@ class Category(CommonInfo):
         ordering = ['title']
 
     def __str__(self):
-        return self.title[:30]
+        return self.title[:TITLE_MAX_LENGTH]
 
 
 class Location(CommonInfo):
@@ -49,7 +51,7 @@ class Location(CommonInfo):
         ordering = ['name']
 
     def __str__(self):
-        return self.name[:30]
+        return self.name[:TITLE_MAX_LENGTH]
 
 
 class Post(CommonInfo):
@@ -73,7 +75,8 @@ class Post(CommonInfo):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        verbose_name='Местоположение'
+        verbose_name='Местоположение',
+        related_name='yourmodel_set'
     )
     category = models.ForeignKey(
         'Category',
@@ -88,4 +91,4 @@ class Post(CommonInfo):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.title[:30]
+        return self.title[:TITLE_MAX_LENGTH]

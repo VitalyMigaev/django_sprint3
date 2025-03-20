@@ -1,7 +1,6 @@
 import pytest
-from django.db.models import BooleanField, CharField, DateTimeField
-
 from blog.models import Location
+from django.db.models import BooleanField, CharField, DateTimeField
 from tests.conftest import _TestModelAttrs
 
 
