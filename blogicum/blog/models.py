@@ -1,94 +1,64 @@
-from django.contrib.auth import get_user_model
-from django.db import models
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 
-from .constants import TITLE_MAX_LENGTH
+from .constants import N_POSTS_LIMIT
+from .models import Category, Post
 
-User = get_user_model()
+
+def get_published_posts(category=None, author=None, location=None):
+    queryset = Post.objects.filter(
+        pub_date__lte=timezone.now(),
+        is_published=True,
+        category__is_published=True
+    ).select_related('category', 'author', 'location')
+
+    if category:
+        queryset = queryset.filter(category=category)
+
+    if author:
+        queryset = queryset.filter(author=author)
+
+    if location:
+        queryset = queryset.filter(location=location)
+
+    return queryset.order_by('-pub_date')
 
 
-class CommonInfo(models.Model):
-    is_published = models.BooleanField(
-        default=True,
-        verbose_name='Опубликовано',
-        help_text='Снимите галочку, чтобы скрыть публикацию.'
+def index(request):
+    author = request.GET.get('author')
+    location = request.GET.get('location')
+    posts = get_published_posts(
+        author=author,
+        location=location)[:N_POSTS_LIMIT]
+    return render(request, 'blog/index.html', {'posts': posts})
+
+
+def post_detail(request, post_id):
+    post = get_object_or_404(
+        get_published_posts(),
+        id=post_id
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Добавлено'
+    return render(request, 'blog/detail.html', {'post': post})
+
+
+def category_posts(request, category_slug):
+    category = get_object_or_404(
+        Category,
+        slug=category_slug,
+        is_published=True
     )
-
-    class Meta:
-        abstract = True
-
-
-class Category(CommonInfo):
-    title = models.CharField(max_length=256, verbose_name='Заголовок')
-    description = models.TextField(verbose_name='Описание')
-    slug = models.SlugField(
-        unique=True,
-        verbose_name='Идентификатор',
-        help_text=(
-            'Идентификатор страницы для URL; разрешены символы латиницы, '
-            'цифры, дефис и подчёркивание.'
-        )
+    author = request.GET.get('author')
+    location = request.GET.get('location')
+    posts = get_published_posts(
+        category=category,
+        author=author,
+        location=location
     )
-
-    class Meta:
-        verbose_name = 'категория'
-        verbose_name_plural = 'Категории'
-        ordering = ['title']
-
-    def __str__(self):
-        return self.title[:TITLE_MAX_LENGTH]
-
-
-class Location(CommonInfo):
-    name = models.CharField(max_length=256, verbose_name='Название места')
-
-    class Meta:
-        verbose_name = 'местоположение'
-        verbose_name_plural = 'Местоположения'
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name[:TITLE_MAX_LENGTH]
-
-
-class Post(CommonInfo):
-    title = models.CharField(max_length=256, verbose_name='Заголовок')
-    text = models.TextField(verbose_name='Текст')
-    pub_date = models.DateTimeField(
-        verbose_name='Дата и время публикации',
-        help_text=(
-            'Если установить дату и время в будущем — можно делать '
-            'отложенные публикации.'
-        )
+    return render(
+        request,
+        'blog/category.html',
+        {
+            'category': category,
+            'posts': posts
+        }
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Автор публикации',
-        related_name='posts'
-    )
-    location = models.ForeignKey(
-        'Location',
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        verbose_name='Местоположение',
-        related_name='yourmodel_set'
-    )
-    category = models.ForeignKey(
-        'Category',
-        null=True,
-        on_delete=models.SET_NULL,
-        verbose_name='Категория'
-    )
-
-    class Meta:
-        verbose_name = 'публикация'
-        verbose_name_plural = 'Публикации'
-        ordering = ['-pub_date']
-
-    def __str__(self):
-        return self.title[:TITLE_MAX_LENGTH]
