@@ -76,14 +76,14 @@ class Post(CommonInfo):
         blank=True,
         on_delete=models.SET_NULL,
         verbose_name='Местоположение',
-        related_name='locations'
+        related_name='posts'
     )
     category = models.ForeignKey(
         'Category',
         null=True,
         on_delete=models.SET_NULL,
         verbose_name='Категория',
-        related_name='categories'
+        related_name='posts'
     )
 
     class Meta:
