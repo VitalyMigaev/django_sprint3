@@ -67,26 +67,24 @@ class Post(CommonInfo):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации',
-        related_name='posts'
+        verbose_name='Автор публикации'
     )
     location = models.ForeignKey(
         'Location',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        verbose_name='Местоположение',
-        related_name='posts'
+        verbose_name='Местоположение'
     )
     category = models.ForeignKey(
         'Category',
         null=True,
         on_delete=models.SET_NULL,
-        verbose_name='Категория',
-        related_name='posts'
+        verbose_name='Категория'
     )
 
     class Meta:
+        default_related_name = 'posts'
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
         ordering = ['-pub_date']
